@@ -1,8 +1,8 @@
-const models = require("../service");
+const service = require("../service");
 
 const get = async (_, res, next) => {
   try {
-    const contacts = await listContacts();
+    const contacts = await service.listContacts();
     return res.json({
       status: "success",
       code: 200,
@@ -19,7 +19,7 @@ const getById = async (req, res, next) => {
   const { contactId } = req.params;
 
   try {
-    const result = await models.getContactById(contactId);
+    const result = await service.getContactById(contactId);
     if (result) {
       return res.json({
         status: "success",
@@ -42,9 +42,14 @@ const getById = async (req, res, next) => {
 
 const create = async (req, res, next) => {
   const { name, email, phone } = req.body;
-  console.log(req.body);
+
+  if (name === undefined || email === undefined || phone === undefined) {
+    res.status(400).json({ message: "missing required name - field" });
+    return;
+  }
+
   try {
-    const result = await models.createContact({ name, email, phone });
+    const result = await service.createContact({ name, email, phone });
 
     return res.status(201).json({
       status: "success",
@@ -61,7 +66,7 @@ const remove = async (req, res, next) => {
   const { contactId } = req.params;
 
   try {
-    const result = await models.removeContact(contactId);
+    const result = await service.removeContact(contactId);
     if (result) {
       return res.json({
         status: "success",
@@ -87,17 +92,24 @@ const update = async (req, res, next) => {
   const { contactId } = req.params;
   const { name, email, phone } = req.body;
 
+  if (name === undefined || email === undefined || phone === undefined) {
+    res.status(400).json({ message: "missing required name - field" });
+    return;
+  }
+
   try {
-    const result = await models.updateContact(contactId, {
-      name,
-      email,
-      phone,
-    });
-    if (result) {
+    const contacts = await service.getContactById(contactId);
+
+    if (contacts) {
+      await service.updateContact(contactId, {
+        name,
+        email,
+        phone,
+      });
       return res.json({
         status: "success",
         code: 200,
-        data: { contact: result },
+        data: { name, email, phone },
       });
     } else {
       return res.status(404).json({
@@ -121,18 +133,20 @@ const favouriteStatus = async (req, res, next) => {
     return res.status(400).json({ message: "Missing field favorite" });
   }
   try {
-    const result = await models.updateStatusContact(contactId, favorite);
-    if (result) {
+    const contacts = await service.getContactById(contactId);
+
+    if (contacts) {
+      await service.updateStatusContact(contactId, favorite);
       return res.json({
         status: "success",
         code: 200,
-        data: { contact: result },
+        data: { favorite },
       });
     } else {
       return res.status(404).json({
         status: "error",
         code: 404,
-        message: `Not found task id: ${contactId}`,
+        message: `Not found contact id: ${contactId}`,
         data: "Not Found",
       });
     }

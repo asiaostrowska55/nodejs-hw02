@@ -1,9 +1,6 @@
 const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
-const mongoose = require("mongoose");
-
-require("dotenv").config();
 
 const contactsRouter = require("./routes/api/contacts");
 
@@ -25,25 +22,5 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   res.status(500).json({ message: err.message });
 });
-
-const URI = process.env.URI;
-const PORT = process.env.PORT || 3000;
-
-const connection = mongoose.connect(URI, {
-  dbName: "db-contacts",
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
-
-connection
-  .then(() => {
-    app.listen(PORT, function () {
-      console.log("Database connection successful");
-    });
-  })
-  .catch((err) => {
-    console.log(`Server not running. Error message: ${err.message}`);
-    process.exit(1);
-  });
 
 module.exports = app;

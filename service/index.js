@@ -8,27 +8,27 @@ const getContactById = async (contactId) => {
   return Contact.findOne({ _id: contactId });
 };
 
-const removeContact = async (contactId) => {
-  Contact.deleteOne({ _id: contactId });
+const removeContact = (contactId) => {
+  return Contact.findOneAndDelete({ _id: contactId });
 };
 
-const addContact = async ({ name, email, phone }) => {
+const createContact = async ({ name, email, phone }) => {
   return Contact.create({ name, email, phone });
 };
 
 const updateContact = async (contactId, body) => {
-  await Contact.updateOne({ _id: contactId }, body);
+  await Contact.findByIdAndUpdate({ _id: contactId }, body);
 };
 
-const updateStatusContact = async (contactId, body) => {
-  await Contact.updateOne({ _id: contactId }, { favorite: body });
+const updateStatusContact = async (contactId, favorite) => {
+  await Contact.updateOne({ _id: contactId }, { favorite: favorite });
 };
 
 module.exports = {
-  listContacts,
+  createContact,
   getContactById,
+  listContacts,
   removeContact,
-  addContact,
   updateContact,
   updateStatusContact,
 };
