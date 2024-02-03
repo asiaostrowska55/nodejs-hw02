@@ -10,7 +10,7 @@ const app = express();
 
 const formatsLogger = app.get("env") === "development" ? "dev" : "short";
 
-require("./config/config-passport");
+require("./config/config.passport");
 
 app.use(logger(formatsLogger));
 app.use(cors());

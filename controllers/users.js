@@ -8,9 +8,7 @@ const secret = process.env.SECRET;
 const Joi = require("joi");
 const postSchema = Joi.object({
   email: Joi.string().email().required(),
-  password: Joi.string().pattern(
-    /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,30}$/
-  ),
+  password: Joi.string().pattern(/^(?=.*\d)(?=.*[a-z]).{8,30}$/),
 });
 
 const signUp = async (req, res, next) => {
@@ -72,7 +70,13 @@ const logIn = async (req, res, _) => {
       message: "Incorrect email or password",
     });
   }
-  const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+
+  const payload = {
+    id: user.id,
+    email: user.email,
+  };
+
+  const token = jwt.sign(payload, secret, { expiresIn: "24h" });
   res.json({
     status: "success",
     code: 200,
@@ -83,18 +87,19 @@ const logIn = async (req, res, _) => {
 
   user.token = token;
   user.save();
-
-  const payload = {
-    id: user.id,
-    email: user.email,
-  };
 };
 
 const logOut = async (req, res, next) => {
   try {
     req.user.token = null;
     await req.user.save();
-    res.status(204).json();
+    res.json({
+      status: "success",
+      code: 200,
+      data: {
+        message: "Authorization was successful",
+      },
+    });
   } catch (err) {
     next(err);
   }

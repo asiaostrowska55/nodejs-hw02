@@ -11,7 +11,7 @@ const validateObjectId = (req, res, next) => {
   next();
 };
 
-router.get("/", controllerContact.get, controllerContact.getFavourite);
+router.get("/", controllerContact.get);
 
 router.get("/:contactId", controllerContact.getById);
 
