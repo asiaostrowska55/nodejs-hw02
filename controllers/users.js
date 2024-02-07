@@ -37,7 +37,11 @@ const signUp = async (req, res, next) => {
     });
   }
 
-  const avatarURL = gravatar.url(email, { s: "100", r: "g", d: "retro" }, true);
+  const avatarURL = gravatar.url(
+    email,
+    { s: "250", r: "g", protocol: "https" },
+    true
+  );
 
   try {
     const newUser = new User({ email, password, avatarURL });
@@ -126,10 +130,9 @@ const updateImageURL = async (req, res, next) => {
   const avatar = req.file;
   const { _id } = req.user;
 
+  const storeImage = path.join(process.cwd(), "public", "avatars");
   const avatarPath = path.join(storeImage, `${avatar.originalname}`);
   const avatarURL = `/avatars/${avatar.originalname}`;
-
-  const storeImage = path.join(process.cwd(), "public", "avatars");
 
   try {
     const avatarResize = await Jimp.read(avatar.path);
