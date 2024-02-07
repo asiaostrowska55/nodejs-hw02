@@ -1,17 +1,15 @@
 const path = require("path");
 const fs = require("fs").promises;
 
-const accessible = async (path) => {
-  try {
-    await fs.access(path);
-    return true;
-  } catch {
-    return false;
-  }
+const isAccessible = (path) => {
+  return fs
+    .access(path)
+    .then(() => true)
+    .catch(() => false);
 };
 
-const createFolder = async (folder) => {
-  if (!(await accessible(folder))) {
+const createFolderIsNotExist = async (folder) => {
+  if (!(await isAccessible(folder))) {
     await fs.mkdir(folder, { recursive: true });
   }
 };
@@ -20,8 +18,8 @@ const verifyFolders = async () => {
   const uploadDir = path.join(process.cwd(), "tmp");
   const storeImage = path.join(process.cwd(), "public", "avatars");
 
-  await createFolder(uploadDir);
-  await createFolder(storeImage);
+  await createFolderIsNotExist(uploadDir);
+  await createFolderIsNotExist(storeImage);
 };
 
-module.exports = { verifyFolders };
+module.exports = verifyFolders;
