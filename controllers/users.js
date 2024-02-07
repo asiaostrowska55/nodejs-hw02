@@ -1,11 +1,15 @@
 const service = require("../service");
 const jwt = require("jsonwebtoken");
 const User = require("../schemas/users.schema");
+const Joi = require("joi");
+const gravatar = require("gravatar");
+const path = require("path");
+const fs = require("fs");
+const Jimp = require("jimp");
 
 require("dotenv").config();
 const secret = process.env.SECRET;
 
-const Joi = require("joi");
 const postSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().pattern(/^(?=.*\d)(?=.*[a-z]).{8,30}$/),
@@ -33,15 +37,17 @@ const signUp = async (req, res, next) => {
     });
   }
 
+  const avatarURL = gravatar.url(email, { s: "100", r: "g", d: "retro" }, true);
+
   try {
-    const newUser = new User({ email, password });
+    const newUser = new User({ email, password, avatarURL });
     await newUser.setPassword(password);
     await newUser.save();
 
     res.status(201).json({
       status: "Registration successful",
       code: 201,
-      user: { email, subscription: "starter" },
+      user: { email, subscription: "starter", avatarURL },
     });
   } catch (err) {
     console.error(err);
@@ -116,9 +122,48 @@ const getCurrent = async (req, res, next) => {
   });
 };
 
+const updateImageURL = async (req, res, next) => {
+  const avatar = req.file;
+  const { _id } = req.user;
+
+  const avatarPath = path.join(storeImage, `${avatar.originalname}`);
+  const avatarURL = `/avatars/${avatar.originalname}`;
+
+  const storeImage = path.join(process.cwd(), "public", "avatars");
+
+  try {
+    const avatarResize = await Jimp.read(avatar.path);
+    avatarResize.resize(250, 250);
+
+    await avatarResize.writeAsync(avatarPath);
+
+    await fs.promises.unlink(avatar.path);
+  } catch (err) {
+    await fs.promises.unlink(avatar.path);
+    return next(err);
+  }
+
+  try {
+    const result = await service.updateAvatar(avatarURL, _id);
+    if (result) {
+      res.json({
+        status: "success",
+        code: 200,
+        message: "Updated Avatar",
+        data: { avatarURL },
+      });
+    }
+  } catch (err) {
+    console.log(err.message);
+
+    next(err);
+  }
+};
+
 module.exports = {
   getCurrent,
   logIn,
   logOut,
   signUp,
+  updateImageURL,
 };
