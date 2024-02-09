@@ -5,21 +5,16 @@ const gravatar = require("gravatar");
 const path = require("path");
 const fs = require("fs");
 const Jimp = require("jimp");
-const { nanoid } = require("nanoid");
+const { v4: uuidv4 } = require("uuid");
 const sendVerification = require("../utils/mail");
-const { postSchema } = require("../utils/validation");
+const { validateUser } = require("../utils/validation");
 
 require("dotenv").config();
 const secret = process.env.SECRET;
 
-// const postSchema = Joi.object({
-//   email: Joi.string().email().required(),
-//   password: Joi.string().pattern(/^(?=.*\d)(?=.*[a-z]).{8,30}$/),
-// });
-
 const signUp = async (req, res, next) => {
   const { email, password } = req.body;
-  const validationResult = postSchema.validate({ email, password });
+  const validationResult = validateUser.validate({ email, password });
 
   if (validationResult.error) {
     res.status(400).json({
@@ -44,7 +39,7 @@ const signUp = async (req, res, next) => {
     { s: "250", r: "g", protocol: "https" },
     true
   );
-  const verificationToken = nanoid();
+  const verificationToken = uuidv4();
 
   try {
     const newUser = new User({ email, password, avatarURL, verificationToken });
@@ -67,7 +62,7 @@ const signUp = async (req, res, next) => {
 
 const logIn = async (req, res, _) => {
   const { email, password } = req.body;
-  const validationResult = postSchema.validate({ email, password });
+  const validationResult = validateUser.validate({ email, password });
 
   if (validationResult.error) {
     res.status(400).json({
