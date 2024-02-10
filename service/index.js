@@ -45,12 +45,17 @@ const updateAvatar = (avatarURL, owner) => {
   return User.findByIdAndUpdate({ _id: owner }, { $set: { avatarURL } });
 };
 
+const getUserWithToken = (verificationToken) => {
+  return User.findOne({ verificationToken });
+};
+
 module.exports = {
   createContact,
   createtUser,
   getContactById,
   getFavoriteContacts,
   getUser,
+  getUserWithToken,
   listContacts,
   removeContact,
   updateContact,

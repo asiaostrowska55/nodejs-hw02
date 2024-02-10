@@ -1,4 +1,5 @@
 const service = require("../service");
+const { validateContact } = require("../utils/validation");
 
 const get = async (_, res, next) => {
   try {
@@ -47,6 +48,8 @@ const create = async (req, res, next) => {
     res.status(400).json({ message: "missing required name - field" });
     return;
   }
+
+  const validationResult = validateContact.validate({ name, email, phone });
 
   try {
     const result = await service.createContact({ name, email, phone });
