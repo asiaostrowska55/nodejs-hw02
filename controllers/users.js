@@ -1,12 +1,12 @@
-const service = require("../service");
-const jwt = require("jsonwebtoken");
-const User = require("../schemas/users.schema");
-const gravatar = require("gravatar");
-const path = require("path");
 const fs = require("fs");
+const gravatar = require("gravatar");
+const jwt = require("jsonwebtoken");
 const Jimp = require("jimp");
-const { v4: uuidv4 } = require("uuid");
+const path = require("path");
+const service = require("../service");
 const sendVerification = require("../utils/mail");
+const User = require("../schemas/users.schema");
+const { v4: uuidv4 } = require("uuid");
 const { validateUser } = require("../utils/validation");
 
 require("dotenv").config();
@@ -156,7 +156,7 @@ const updateImageURL = async (req, res, next) => {
   const avatar = req.file;
   const { _id } = req.user;
 
-  const storeImage = path.join(process.cwd(), "public", "avatars");
+  const storeImage = path.join(__dirname, "public", "avatars");
   const avatarPath = path.join(storeImage, `${avatar.originalname}`);
   const avatarURL = `/avatars/${avatar.originalname}`;
 
